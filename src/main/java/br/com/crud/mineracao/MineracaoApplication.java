@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MineracaoApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(MineracaoApplication.class, args);
 	}
 

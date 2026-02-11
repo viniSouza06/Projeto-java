@@ -38,6 +38,7 @@ public class FuncionarioController   {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id){
+        funcionarioService.remover(id);
         return ResponseEntity.noContent().build();
     }
 

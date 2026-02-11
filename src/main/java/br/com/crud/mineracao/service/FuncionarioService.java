@@ -13,10 +13,12 @@ public class FuncionarioService {
     private IFuncionarioRepository funcionarioRepository;
 
     public FuncionarioModel criar(FuncionarioModel funcionario) {
+
         return funcionarioRepository.save(funcionario);
     }
 
     public List<FuncionarioModel> listar(){
+
         return funcionarioRepository.findAll();
     }
 
