@@ -1,6 +1,7 @@
 package br.com.crud.mineracao.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 
 
 @Entity
@@ -16,12 +17,19 @@ public class FuncionarioModel {
     @Column(unique = true)
     private String email;
 
+    @Pattern(regexp = "analista|minerador|gerente")
+    @Column(nullable = false)
+    private String cargo;
+
+
+
 
     public FuncionarioModel() {}
 
-    public FuncionarioModel(String nome, String email) {
+    public FuncionarioModel(String nome, String email,  String cargo) {
         this.nome = nome;
         this.email = email;
+        this.cargo = cargo;
     }
 
     public String getNome(){
@@ -38,6 +46,14 @@ public class FuncionarioModel {
 
     public void setEmail(String email){
         this.email = email;
+    }
+
+    public String getCargo(){
+        return this.cargo;
+    }
+
+    public void setCargo(String cargo){
+        this.cargo = cargo;
     }
 
     public long getId(){
