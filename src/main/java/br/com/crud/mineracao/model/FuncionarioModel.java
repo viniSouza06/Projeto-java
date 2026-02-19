@@ -2,11 +2,17 @@ package br.com.crud.mineracao.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 
 @Entity
 @Table(name = "TB_FUNCIONARIO")
 public class FuncionarioModel {
+
+    @CreationTimestamp
+    private LocalDateTime dataCriacao;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +26,8 @@ public class FuncionarioModel {
     @Pattern(regexp = "analista|minerador|gerente")
     @Column(nullable = false)
     private String cargo;
+
+
 
 
 
@@ -56,8 +64,12 @@ public class FuncionarioModel {
         this.cargo = cargo;
     }
 
-    public long getId(){
+    public Long getId(){
         return this.id;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
     }
 
 

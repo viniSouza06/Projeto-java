@@ -33,6 +33,8 @@ public class FuncionarioService {
 
         funcionarioExiste.setNome(dadosAtualizados.getNome());
         funcionarioExiste.setEmail(dadosAtualizados.getEmail());
+        funcionarioExiste.setCargo(dadosAtualizados.getCargo());
+
 
         return funcionarioRepository.save(funcionarioExiste);
     }
