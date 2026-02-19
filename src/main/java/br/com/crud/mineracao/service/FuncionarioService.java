@@ -14,6 +14,10 @@ public class FuncionarioService {
 
     public FuncionarioModel criar(FuncionarioModel funcionario) {
 
+        if(funcionarioRepository.existsByEmail(funcionario.getEmail())){
+            throw new RuntimeException("Email já cadastrado");
+        }
+
         return funcionarioRepository.save(funcionario);
     }
 
@@ -30,6 +34,10 @@ public class FuncionarioService {
     public FuncionarioModel atualizar(Long id, FuncionarioModel dadosAtualizados){
 
         FuncionarioModel funcionarioExiste = buscarPorId(id);
+
+        if( !funcionarioRepository.equals(dadosAtualizados.getEmail()) && funcionarioRepository.existsByEmail(dadosAtualizados.getEmail())){
+            throw new RuntimeException("Email já cadastrado");
+        }
 
         funcionarioExiste.setNome(dadosAtualizados.getNome());
         funcionarioExiste.setEmail(dadosAtualizados.getEmail());
