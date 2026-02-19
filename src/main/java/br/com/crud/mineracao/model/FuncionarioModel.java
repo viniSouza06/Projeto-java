@@ -3,6 +3,7 @@ package br.com.crud.mineracao.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -11,16 +12,23 @@ import java.time.LocalDateTime;
 @Table(name = "TB_FUNCIONARIO")
 public class FuncionarioModel {
 
+    @Column(name = "data_criacao")
     @CreationTimestamp
     private LocalDateTime dataCriacao;
+
+    @Column(name = "data_atualizacao")
+    @UpdateTimestamp
+    private LocalDateTime dataAtualizacao;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nome;
 
-    @Column(unique = true)
+
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Pattern(regexp = "analista|minerador|gerente")
@@ -70,6 +78,10 @@ public class FuncionarioModel {
 
     public LocalDateTime getDataCriacao() {
         return dataCriacao;
+    }
+
+    public LocalDateTime getDataAtualizacao(){
+        return dataAtualizacao;
     }
 
 
