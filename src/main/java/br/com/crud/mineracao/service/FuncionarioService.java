@@ -52,4 +52,9 @@ public class FuncionarioService {
         funcionarioRepository.delete(funcionarioExiste);
     }
 
+    public List<FuncionarioModel> ListarPorCargo(String cargo){
+        return funcionarioRepository.findByCargo(cargo);
+
+    }
+
 }

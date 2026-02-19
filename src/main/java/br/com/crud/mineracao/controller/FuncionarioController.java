@@ -43,4 +43,10 @@ public class FuncionarioController {
         funcionarioService.remover(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/cargo/{cargo}")
+    public List<FuncionarioModel> listarPorCargo(@PathVariable String cargo) {
+        return funcionarioService.ListarPorCargo(cargo);
+
+    }
 }
