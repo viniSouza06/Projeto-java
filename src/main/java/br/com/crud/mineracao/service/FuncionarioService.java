@@ -47,9 +47,18 @@ public class FuncionarioService {
         return funcionarioRepository.save(funcionarioExiste);
     }
 
-    public void remover(Long id) {
-        FuncionarioModel funcionarioExiste = buscarPorId(id);
-        funcionarioRepository.delete(funcionarioExiste);
+    public void remover(Long id, Long idFuncionario) {
+        FuncionarioModel gerente = buscarPorId(id);
+        FuncionarioModel funcionario = buscarPorId(idFuncionario);
+        if(gerente.getCargo().equals("gerente")){
+
+            funcionarioRepository.delete(funcionario);
+        }
+
+        else{
+            throw new IllegalStateException("Somente gerentes podem remover funcionarios");
+        }
+
     }
 
     public List<FuncionarioModel> ListarPorCargo(String cargo){

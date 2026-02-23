@@ -38,9 +38,9 @@ public class FuncionarioController {
         return ResponseEntity.ok(funcionarioService.atualizar(id, dadosAtualizados));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
-        funcionarioService.remover(id);
+    @DeleteMapping("/{idGerente}/{idFuncionario}")
+    public ResponseEntity<Void> remover(@PathVariable Long idGerente,@PathVariable Long idFuncionario) {
+        funcionarioService.remover(idGerente, idFuncionario);
         return ResponseEntity.noContent().build();
     }
 
