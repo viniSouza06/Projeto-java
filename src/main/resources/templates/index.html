@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mineracao</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css" />
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid"><a class="navbar-brand" href="#">Mineracao</a></div>
+</nav>
+<main class="container mt-4">
+    <div id="alertArea"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Funcionários</h3>
+
+            <div class="mb-3">
+                <button id="btnListar" class="btn btn-outline-primary btn-sm">Listar</button>
+                <button id="btnMostrarAtualizar" class="btn btn-outline-warning btn-sm">Atualizar</button>
+            </div>
+
+            <table class="table table-striped" id="tblFuncionarios">
+                <thead><tr><th>Id</th><th>Nome</th><th>Email</th><th>Cargo</th><th>Ações</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3"><div class="card-body">
+                <h5 class="card-title">Novo Funcionário</h5>
+                <form id="formCriar">
+                    <div class="mb-3"><label class="form-label">Nome</label><input name="nome" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Email</label><input name="email" type="email" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Cargo</label>
+                        <select name="cargo" class="form-select" required>
+                            <option value="analista">Analista</option>
+                            <option value="minerador">Minerador</option>
+                            <option value="gerente">Gerente</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Criar</button>
+                </form>
+            </div></div>
+
+            <div class="card mb-3"><div class="card-body">
+                <h5 class="card-title">Buscar por Id</h5>
+                <div class="input-group">
+                    <input id="inputBuscarId" class="form-control" placeholder="Id do funcionário">
+                    <button id="btnExecBuscarId" class="btn btn-outline-secondary">Buscar</button>
+                </div>
+            </div></div>
+
+            <div class="card mb-3"><div class="card-body">
+                <h5 class="card-title">Listar por Cargo</h5>
+                <div class="input-group">
+                    <select id="selectCargoList" class="form-select">
+                        <option value="">-- selecione --</option>
+                        <option value="analista">Analista</option>
+                        <option value="minerador">Minerador</option>
+                        <option value="gerente">Gerente</option>
+                    </select>
+                    <button id="btnExecListarCargo" class="btn btn-outline-secondary">Listar</button>
+                </div>
+            </div></div>
+
+            <div id="cardAtualizar" class="card mb-3" style="display:none;"><div class="card-body">
+                <h5 class="card-title">Atualizar Funcionário</h5>
+                <form id="formAtualizar">
+                    <div class="mb-3"><label class="form-label">Id</label><input name="id" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Nome</label><input name="nome" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Email</label><input name="email" type="email" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Cargo</label>
+                        <select name="cargo" class="form-select">
+                            <option value="">-- Selecionar --</option>
+                            <option value="analista">Analista</option>
+                            <option value="minerador">Minerador</option>
+                            <option value="gerente">Gerente</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-warning" type="submit">Atualizar</button>
+                </form>
+            </div></div>
+
+        </div>
+    </div>
+</main>
+
+<script src="/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showAlert(message, type = 'success') {
+        const area = document.getElementById('alertArea');
+        area.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+    }
+
+    function preencherTabela(list) {
+        const tbody = document.querySelector('#tblFuncionarios tbody');
+        tbody.innerHTML = '';
+        list.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${f.id}</td>
+                            <td>${f.nome}</td>
+                            <td>${f.email}</td>
+                            <td>${f.cargo}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm btn-delete" data-id="${f.id}">Remover</button>
+                            </td>`;
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const idFuncionario = btn.dataset.id;
+                const idGerente = prompt('Informe o id do gerente solicitante (para autorização):');
+                if (!idGerente) {
+                    showAlert('Operação cancelada: id do gerente não informado.', 'warning');
+                    return;
+                }
+                const confirmar = confirm(`Confirma remover o funcionário com id ${idFuncionario}?`);
+                if (!confirmar) {
+                    showAlert('Remoção cancelada.', 'info');
+                    return;
+                }
+                try {
+                    const res = await fetch(`/funcionarios/${encodeURIComponent(idGerente)}/${encodeURIComponent(idFuncionario)}`, {
+                        method: 'DELETE'
+                    });
+                    if (res.status === 204) {
+                        showAlert('Funcionário removido com sucesso.', 'success');
+                    } else if (res.status === 403) {
+                        const txt = await res.text();
+                        showAlert('Proibido: ' + txt, 'danger');
+                    } else if (res.status === 404) {
+                        const txt = await res.text();
+                        showAlert('Não encontrado: ' + txt, 'warning');
+                    } else {
+                        const txt = await res.text();
+                        showAlert('Erro ao remover: ' + txt, 'danger');
+                    }
+                } catch (err) {
+                    showAlert('Erro de rede: ' + err.message, 'danger');
+                }
+            });
+        });
+    }
+
+    async function listar() {
+        try {
+            const res = await fetch('/funcionarios');
+            if (!res.ok) throw new Error('Erro ao listar: ' + res.status);
+            const list = await res.json();
+            preencherTabela(list);
+            showAlert('Lista carregada.', 'success');
+        } catch (err) {
+            showAlert(err.message, 'danger');
+        }
+    }
+
+    async function criar(event) {
+        event.preventDefault();
+        const form = event.target;
+        const data = {
+            nome: form.nome.value.trim(),
+            email: form.email.value.trim().toLowerCase(),
+            cargo: form.cargo.value
+        };
+        try {
+            const res = await fetch('/funcionarios', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (res.status === 201) {
+                showAlert('Funcionário criado com sucesso.', 'success');
+                form.reset();
+            } else {
+                const txt = await res.text();
+                showAlert('Erro ao criar: ' + txt, 'danger');
+            }
+        } catch (err) {
+            showAlert('Erro de rede: ' + err.message, 'danger');
+        }
+    }
+
+    async function buscarPorId(id) {
+        try {
+            const res = await fetch(`/funcionarios/${encodeURIComponent(id)}`);
+            if (res.ok) {
+                const f = await res.json();
+                preencherTabela([f]);
+                showAlert('Funcionário encontrado.', 'success');
+            } else if (res.status === 404) {
+                const txt = await res.text();
+                showAlert('Não encontrado: ' + txt, 'warning');
+            } else {
+                const txt = await res.text();
+                showAlert('Erro: ' + txt, 'danger');
+            }
+        } catch (err) {
+            showAlert('Erro de rede: ' + err.message, 'danger');
+        }
+    }
+
+    async function listarPorCargo(cargo) {
+        try {
+            const res = await fetch(`/funcionarios/cargo/${encodeURIComponent(cargo)}`);
+            if (res.ok) {
+                const list = await res.json();
+                preencherTabela(list);
+                showAlert(`Lista por cargo "${cargo}" carregada.`, 'success');
+            } else {
+                const txt = await res.text();
+                showAlert('Erro: ' + txt, 'danger');
+            }
+        } catch (err) {
+            showAlert('Erro de rede: ' + err.message, 'danger');
+        }
+    }
+
+    async function atualizar(event) {
+        event.preventDefault();
+        const form = event.target;
+        const id = form.id.value.trim();
+        if (!id) {
+            showAlert('Informe o id para atualizar.', 'warning');
+            return;
+        }
+        const payload = {};
+        if (form.nome.value) payload.nome = form.nome.value.trim();
+        if (form.email.value) payload.email = form.email.value.trim().toLowerCase();
+        if (form.cargo.value) payload.cargo = form.cargo.value;
+        try {
+            const res = await fetch(`/funcionarios/${encodeURIComponent(id)}`, {
+                method: 'PUT',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showAlert('Funcionário atualizado com sucesso.', 'success');
+                form.reset();
+            } else if (res.status === 404) {
+                const txt = await res.text();
+                showAlert('Não encontrado: ' + txt, 'warning');
+            } else {
+                const txt = await res.text();
+                showAlert('Erro ao atualizar: ' + txt, 'danger');
+            }
+        } catch (err) {
+            showAlert('Erro de rede: ' + err.message, 'danger');
+        }
+    }
+
+    document.getElementById('formCriar').addEventListener('submit', criar);
+    document.getElementById('btnListar').addEventListener('click', () => { listar(); });
+    document.getElementById('btnExecBuscarId').addEventListener('click', () => {
+        const id = document.getElementById('inputBuscarId').value.trim();
+        if (!id) {
+            showAlert('Informe um id para buscar.', 'warning');
+            return;
+        }
+        buscarPorId(id);
+    });
+    document.getElementById('btnExecListarCargo').addEventListener('click', () => {
+        const cargo = document.getElementById('selectCargoList').value;
+        if (!cargo) {
+            showAlert('Selecione um cargo para listar.', 'warning');
+            return;
+        }
+        listarPorCargo(cargo);
+    });
+    document.getElementById('btnMostrarAtualizar').addEventListener('click', () => {
+        const card = document.getElementById('cardAtualizar');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    });
+    document.getElementById('formAtualizar').addEventListener('submit', atualizar);
+</script>
+</body>
+</html>
